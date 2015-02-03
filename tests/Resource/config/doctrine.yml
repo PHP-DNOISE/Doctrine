@@ -1,0 +1,8 @@
+doctrine:
+    dbname:             test
+    host:               localhost
+    port:               3306
+    user:               root
+    password:           noises
+    driver:             pdo_mysql
+    charset:            utf8

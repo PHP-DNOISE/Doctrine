@@ -1,0 +1,24 @@
+{
+    "name": "phpdnoise/doctrine",
+    "type": "library",
+    "description": "Doctrine management component",
+    "authors":[
+        {
+            "name": "Rafael Calleja",
+	        "email": "rafaelcalleja@gmail.com"
+        }
+    ],
+    "require": {
+        "doctrine/orm": "~2.5@dev",
+        "phpdnoise/config": "~0.1@dev"
+    },
+    "autoload": {
+        "psr-4": { "DNOISE\\Component\\Doctrine\\": "src/" }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
+    }
+}
