@@ -21,15 +21,11 @@ class DoctrineBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function setUp(){
 
-        $loader = $this->getMockBuilder('DNOISE\Component\Configuration\Loader')
-            ->setMethods(['get'])
-            ->disableOriginalConstructor()
-            ->getMock()
-        ;
+        $loader = $this->getMockLoader();
 
-        $loader->expects($this->exactly(7))
+        $loader->expects($this->exactly(8))
                 ->method('get')
-                ->will($this->onConsecutiveCalls('foo', 'bar', 'foo', 'bar', 'foo', 'pdo_mysql', 'foo'))
+                ->will($this->onConsecutiveCalls(false, 'foo', 'bar', 'foo', 'bar', 'foo', 'pdo_mysql', 'foo'))
         ;
 
         $this->builder = DoctrineBuilder::create()
@@ -75,6 +71,36 @@ class DoctrineBuilderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($metadataDirectory, [$directory]);
         $this->assertTrue($isDevMode);
+
+    }
+
+    public function testBuildMetadataDirectoryFromConfig(){
+
+        $directory = [sys_get_temp_dir()];
+
+        $loader = $this->getMockLoader();
+
+        $loader->expects($this->exactly(8))
+            ->method('get')
+            ->will($this->onConsecutiveCalls($directory, 'foo', 'bar', 'foo', 'bar', 'foo', 'pdo_mysql', 'foo'))
+        ;
+
+        $builder = DoctrineBuilder::create()
+            ->setConfigurationLoader($loader)
+        ;
+
+        $doctrine = $builder->build();
+        $this->assertEquals($this->getField($builder, 'metadataDirectory'), $directory);
+
+    }
+
+    protected function getMockLoader(){
+
+       return $this->getMockBuilder('DNOISE\Component\Configuration\Loader')
+            ->setMethods(['get'])
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
 
     }
 

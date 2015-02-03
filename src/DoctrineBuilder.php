@@ -37,7 +37,10 @@ class DoctrineBuilder {
         if ( !$this->configuration){
 
             if ( !$this->metadataDirectory )
-                $this->setMetadataDirectory(__DIR__. DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Entity');
+                if(  $directories = $this->configurationLoader->get('doctrine.annotation.paths') )
+                    $this->setMetadataDirectory($directories);
+                else
+                    $this->setMetadataDirectory(__DIR__. DIRECTORY_SEPARATOR . 'Entity');
 
             $this->configuration = Setup::createAnnotationMetadataConfiguration($this->metadataDirectory, $this->isDevMode, null, null, false );
         }
