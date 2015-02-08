@@ -40,7 +40,15 @@ class DoctrineBuilder {
                 if(  $directories = $this->configurationLoader->get('doctrine.annotation.paths', false) )
                     $this->setMetadataDirectory($directories);
                 else
-                    $this->setMetadataDirectory(__DIR__. DIRECTORY_SEPARATOR . 'Entity');
+                   /*
+                    * Ruta de Entity relativo a proyecto actual src/DNOISE/Entity
+                    * TODO: Solución global
+                    */ 
+                   $this->setMetadataDirectory(
+                        __DIR__.DIRECTORY_SEPARATOR
+                            .'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR
+                            .'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR
+                            .'src'.DIRECTORY_SEPARATOR.'DNOISE'.DIRECTORY_SEPARATOR.'Entity');
 
             $this->configuration = Setup::createAnnotationMetadataConfiguration($this->metadataDirectory, $this->isDevMode, null, null, false );
         }
