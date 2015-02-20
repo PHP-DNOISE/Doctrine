@@ -9,11 +9,13 @@
         }
     ],
     "require": {
-        "doctrine/orm": "~2.5@dev",
-        "phpdnoise/config": "~0.1@dev"
+        "doctrine/orm": "~2.5@dev"
     },
     "autoload": {
         "psr-4": { "DNOISE\\Component\\Doctrine\\": "src/" }
+    },
+    "suggest": {
+        "phpdnoise/config": "Permite cargar la configuración usando el YmlConfigDriver"
     },
     "minimum-stability": "dev",
     "extra": {

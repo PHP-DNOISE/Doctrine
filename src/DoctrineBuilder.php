@@ -2,13 +2,19 @@
 
 namespace DNOISE\Component\Doctrine;
 
-use DNOISE\Component\Configuration\FactoryLoader;
-use DNOISE\Component\Configuration\Loader;
+use DNOISE\Component\Doctrine\Mapping\Factory\ConfigurationMetadataFactory;
+use DNOISE\Component\Doctrine\Mapping\Factory\MetadataFactoryInterface;
+use DNOISE\Component\Doctrine\Mapping\Loader\PHPFileLoader;
+use DNOISE\Component\Doctrine\Mapping\Loader\YamlFileLoader;
+
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventManager;
-use Doctrine\DBAL\Configuration;
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Tools\Setup;
 
-class DoctrineBuilder {
+class DoctrineBuilder implements DoctrineBuilderInterface {
 
 
     protected $configurationLoader;
@@ -16,6 +22,25 @@ class DoctrineBuilder {
     protected $isDevMode;
 
     protected $metadataDirectory;
+
+    protected $proxyDir;
+
+    protected $proxyNamespace;
+
+    /**
+     * @var string
+     */
+    private $yamlMapping;
+
+    /**
+     * @var string
+     */
+    private $phpMapping;
+
+    /**
+     * @var MetadataFactoryInterface|null
+     */
+    private $metadataFactory;
 
     /** @var $configuration Configuration */
     protected $configuration;
@@ -29,6 +54,7 @@ class DoctrineBuilder {
 
     public function __construct(){
 
+        $this->proxyNamespace = 'PHPDNOISE\DoctrineProxy';
         $this->configurationLoader = FactoryLoader::factory();
     }
 
@@ -43,6 +69,27 @@ class DoctrineBuilder {
                     $this->setMetadataDirectory(__DIR__. DIRECTORY_SEPARATOR . 'Entity');
 
             $this->configuration = Setup::createAnnotationMetadataConfiguration($this->metadataDirectory, $this->isDevMode, null, null, false );
+
+
+            if ( $this->proxyNamespace )
+                $this->configuration->setProxyNamespace($this->proxyNamespace);
+
+            if ( $this->proxyDir )
+                $this->configuration->setProxyDir($this->proxyDir);
+
+        }
+
+        if (!$this->metadataFactory) {
+
+            $loader = null;
+
+            if ( $this->yamlMapping ) {
+                $loader = new YamlFileLoader($this->yamlMapping);
+            }elseif( $this->phpMapping ){
+                $loader = new PHPFileLoader($this->phpMapping);
+            }
+
+            $this->metadataFactory = new ConfigurationMetadataFactory($loader);
         }
 
         $this->connection =
@@ -61,6 +108,25 @@ class DoctrineBuilder {
             $this->configuration
         );
     }
+
+    /**
+     * @param string $proxyNamespace
+     */
+    public function setProxyNamespace($proxyNamespace)
+    {
+        $this->proxyNamespace = $proxyNamespace;
+        return $this;
+    }
+
+    /**
+     * @param mixed $proxyDir
+     */
+    public function setProxyDir($proxyDir)
+    {
+        $this->proxyDir = $proxyDir;
+        return $this;
+    }
+
 
     /**
      * @param mixed $isDevMode
@@ -108,8 +174,36 @@ class DoctrineBuilder {
     }
 
 
+    /**
+     * {@inheritdoc}
+     */
+    public function addYamlMapping($path)
+    {
+        $this->yamlMapping = $path;
+        return $this;
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function addPhpMapping($path)
+    {
 
+        $this->phpMapping = $path;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setMetadataFactory(MetadataFactoryInterface $metadataFactory)
+    {
+        if ( $this->yamlMapping || $this->phpMapping ) {
+            throw new \InvalidArgumentException('You cannot set a custom metadata factory after adding custom mappings. You should do either of both.');
+        }
+        $this->metadataFactory = $metadataFactory;
+        return $this;
+    }
 
 
 
